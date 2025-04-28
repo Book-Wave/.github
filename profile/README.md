@@ -1,4 +1,4 @@
-# 📦 Book_wave
+# 📚 Book_wave
 
 ### 🔖 서비스 개요
 
