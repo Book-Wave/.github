@@ -67,7 +67,8 @@
 - 단일 서버에서 약 100명의 유저가 동시에 1000개의 메세지를 같은 채팅방에 보낼 경우,  트래픽 누적으로 인한 **HTTP 504 Gateway Timeout** 발생  
 - TPS 또한 ??으로 매우 낮음
 
-![image](https://github.com/user-attachments/assets/1ca50838-80e0-432c-8803-eb7dd696c02f)
+![image](https://github.com/user-attachments/assets/c0d420b8-342a-4715-a418-6e58ffcbafa6)
+
 
 **✅ 개선 방향**  
 - Netty-Websocket 및 RabbitMQ를 통해 성능 및 기능 비교 후 성능 고도화
