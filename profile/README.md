@@ -89,7 +89,8 @@
 <img width="517" alt="인메모리 캐싱 적용" src="https://github.com/user-attachments/assets/4032895f-9b6f-42f0-a494-44b737582506" />
 
 ** 성능 비교 **
-- | 기준                | Netty-WebSocket                          | RabbitMQ                              |
+
+| 기준                | Netty-WebSocket                          | RabbitMQ                              |
 |---------------------|------------------------------------------|---------------------------------------|
 | **최대 TPS**        | 70K/s (단일 서버)                       | 50K/s (단일 노드), 클러스터링 시 확장 |
 | **지연 시간**       | 1ms~3ms                                 | 2ms~15ms                             |
