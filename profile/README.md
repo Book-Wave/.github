@@ -108,29 +108,4 @@
 **결론**
 - 
 
----
-
-#### 3️⃣ 서버 간 통신 속도 개선 - <ins>gRPC 적용</ins>
-
-**📌 문제 상황**  
-- 기존 RESTTemplate (HTTP/1.1) 기반의 동기 통신 구조  
-  - TCP 3-way handshake  
-  - JSON 직렬화 / 역직렬화 비용  
-  - 과도한 헤더 크기로 인한 지연
-
-**✅ 개선 방향**  
-- **gRPC (HTTP/2 기반)** 적용  
-  - 직렬화 비용 절감 (바이너리 기반)  
-  - TCP 연결 재사용으로 성능 향상  
-
-**⏱ 성능 비교**
-
-- **RestTemplate (HTTP / 1.1)**  
-  <img width="615" alt="RestTemplate(http / 1.1)" src="https://github.com/user-attachments/assets/90154579-82a6-4247-9be5-b316aed5a548" />
-
-- **RestTemplate (HTTP / 2)**  
-  <img width="625" alt="RestTemplate(http / 2)" src="https://github.com/user-attachments/assets/4fff0191-325f-4871-bf5c-4c3d19222c42" />
-
-- **gRPC**  
-  <img width="669" alt="gRPC" src="https://github.com/user-attachments/assets/7e24f753-398a-455a-98d4-34adda48ffea" />
 
