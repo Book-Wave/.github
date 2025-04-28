@@ -57,11 +57,7 @@
 **✅ 개선 방향**  
 - **token claim에 사용자 닉네임** 추가 : 사용자의 닉네임을 access token의 claim에 포함시켜, DB에 대한 불필요한 조회를 최소화.
 - **token 헤더의 크기 증가** 에 대한 해결 : 토큰 헤더의 크기는 약 31바이트 증가(920바이트 → 951바이트)했지만, 이는 DB 접근을 줄이는 것에 비해 미미한 오버헤드.
-
-<img width="268" alt="Image" src="https://github.com/user-attachments/assets/1271fc95-722a-410a-9924-c96ed7154b69" />
-<div/>
-<img width="265" alt="Image" src="https://github.com/user-attachments/assets/7a7fb82b-ee73-43fa-9ac9-b61a54c711b0" /> 
-
+<img width="533" alt="Image" src="https://github.com/user-attachments/assets/ff22f69a-e332-4aa8-b019-ddc044afb20d" />
 
 ---
 
