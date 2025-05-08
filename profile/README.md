@@ -61,31 +61,48 @@
 
 ---
 
-#### 2️⃣ 채팅 기능 고도화 ( 메세지 큐 적용 ) - <ins>TPS 약 ??% 상승</ins>
+#### 2️⃣ 채팅 기능 고도화 ( 메세지 큐 적용 ) - <ins>에러율 0% 달성</ins>
 
 **📌 문제 상황**  
 - 단일 서버에서 약 100명의 유저가 동시에 1000개의 메세지를 같은 채팅방에 보낼 경우,  트래픽 누적으로 인한 **HTTP 504 Gateway Timeout** 발생  
-- TPS 또한 ??으로 매우 낮음
+- 응답 시간 그래프가 주기적으로 0ms로 떨어지며 연결이 끊기는 것으로 보이는 현상 -> 서비스 불능 또는 응답 지연으로 해석 가능
+
+  -> http/1.1의 라인 블로킹 및 stomp 세션 관리 및 리소스의 한계로 추정
 
 ![image](https://github.com/user-attachments/assets/c0d420b8-342a-4715-a418-6e58ffcbafa6)
-
 
 **✅ 개선 방향**  
 - Netty-Websocket 및 RabbitMQ를 통해 성능 및 기능 비교 후 성능 고도화
 
 **1️⃣** Netty-Websocket
-- Netty 프레임워크 기반으로 websocket 통신 최적화 하여 ~~
-- 네티에 대한 추가설명
+- HTTP/1.1의 한계를 극복하고, 더 낮은 레벨의 네트워크 제어를 통해 성능을 최적화하고자 Netty 프레임워크를 사용하여 WebSocket + STOMP 서버를 직접 구현 시도
 
-**📈 **
-<img width="517" alt="인메모리 캐싱 적용" src="https://github.com/user-attachments/assets/4032895f-9b6f-42f0-a494-44b737582506" />
+**📈**
+![netty](https://github.com/user-attachments/assets/8dffcc20-f11c-43b9-9810-efb9a5a4aae8)
+
+**❗** 문제점
+* STOMP 프로토콜 직접 구현 필요
+   * 기존에 구현되어있는 모든 어노테이션으로 이루어진 STOMP 프로토콜 직접 구현 필요
+     
+* HTTP 핸드셰이크 -> WebSocket 업그레이드 -> WebSocketFrame -> ByteBuf (STOMP 코덱용) -> StompFrame (애플리케이션 로직용)으로 이어지는 인바운드 데이터 변환과 그 역의 아웃바운드 변환 과정에서의 복잡성
+
+* ByteBuf의 참조 카운트 관리(retain(), release()) 미흡으로 인한 메모리 누수 가능성
+
+-> Netty는 높은 유연성과 성능 잠재력을 제공하지만, STOMP와 같은 고수준 프로토콜을 직접 구현하는 것은 상당한 개발 시간과 Netty 내부 동작에 대한 깊은 이해를 요구함 </div>학습 곡선이 매우 가파르고, 안정적인 구현까지 많은 디버깅 노력이 필요하여 현재 프로젝트의 자원과 일정을 고려했을 때 실질적인 성능 향상 측정 단계까지 나아가기 어려움
+  
 
 **2️⃣** 메세지 큐
-- 프로젝트 기간을 반영한 학습 곡선 및 메세지 복구 전략에 대한 DeadLetter Queue 구현이 용이한 RabbitMQ 선택
-- 이후 확장에서도 용이하다 ~~
+- WebSocket/STOMP 프로토콜 자체를 배제하고, 클라이언트와 서버가 메세지 큐를 통해 직접 메시지를 주고받는 방식으로 변경하여 통신 안정성 및 성능 특성 평가
+- 프로젝트 기간 및 학습 곡선을 고려하고, DeadLetterQueue 구현에 용이한 RabbitMQ 채택
 
 **📈 **
-<img width="517" alt="인메모리 캐싱 적용" src="https://github.com/user-attachments/assets/4032895f-9b6f-42f0-a494-44b737582506" />
+![image](https://github.com/user-attachments/assets/0d298b07-5f5e-4d0a-8da6-63eecb1f7c2c)
+
+-> 테스트 플로우상 테스트 툴이 publish -> consume 까지의 일렬의 과정을 다 받아야 응답 시간이 측정되기에 실제 시간과 상당한 차이 존재
+
+**❗** 문제점
+* 각 채팅 채널에 대한 queue 선택 필요
+   * 한 채팅방에 여러 사용자가 들어올 때, 사용자의 인원수 및 서버 스펙 고려 필요
 
 ** 성능 비교 **
 
@@ -100,12 +117,16 @@
 
 
 **📉 개선 전**
-<img width="515" alt="DB findAll 기반 종가 조회" src="https://github.com/user-attachments/assets/68d4f328-eaaf-4c13-9689-9896ef3ca129" />
+![image](https://github.com/user-attachments/assets/c0d420b8-342a-4715-a418-6e58ffcbafa6)
 
 **📈 개선 후**
-<img width="517" alt="인메모리 캐싱 적용" src="https://github.com/user-attachments/assets/4032895f-9b6f-42f0-a494-44b737582506" />
+![image](https://github.com/user-attachments/assets/0d298b07-5f5e-4d0a-8da6-63eecb1f7c2c)
 
 **결론**
-- 
+- 메세지 상태 유지 및 이후 사용자와 서비스 확장에 따른 확장성 용이
+- 또한 AMPQ (바이너리 프로토콜)을 사용하여 text 기반의 Stomp보다 작은 크기
+- 메세지를 사용한 비동기 로직으로서 이후 서버 분리시 의존성 낮추고 결합성 높이기 용이
+  
+-> 메세지 큐를 통한 채팅 서비스로 변경
 
 
